@@ -1,0 +1,92 @@
+﻿<Window x:Class="TextAnalyzer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TextAnalyzer"
+        xmlns:vm="clr-namespace:TextAnalyzer.ViewModels"
+        mc:Ignorable="d"
+        Title="Text Analyzer" Height="450" Width="800"
+        Icon="free-icon-exam-4696457.ico">
+
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#d4fafc"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                                <TextBlock Text="Введите текст..." Foreground="Gray" Margin="5,0,0,0" 
+                                           Visibility="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:TextToVisibilityConverter.Instance}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RoundedDataGridStyle" TargetType="DataGrid">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBox Grid.Row="0" Grid.ColumnSpan="2" Margin="5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                 Style="{StaticResource RoundedTextBoxStyle}" Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Button Grid.Row="1" Grid.Column="0" Content="Провести частотный анализ" Margin="5" Style="{StaticResource RoundedButtonStyle}"
+                Command="{Binding FrequencyAnalysisCommand}"/>
+        <Button Grid.Row="1" Grid.Column="1" Content="Проверить орфографию" Margin="5" Style="{StaticResource RoundedButtonStyle}"
+                Command="{Binding SpellingCheckCommand}"/>
+
+        <DataGrid Grid.Row="2" Grid.Column="0" Margin="5" AutoGenerateColumns="False" Style="{StaticResource RoundedDataGridStyle}"
+                  ItemsSource="{Binding FrequencyItems}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Count}" Width="*"/>
+                <DataGridTextColumn Header="Слово" Binding="{Binding Word}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DataGrid Grid.Row="2" Grid.Column="1" Margin="5" AutoGenerateColumns="False" Style="{StaticResource RoundedDataGridStyle}"
+                  ItemsSource="{Binding SpellingErrors}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Предложение" Binding="{Binding SuggestedCorrection}" Width="*"/>
+                <DataGridTextColumn Header="Ошибка" Binding="{Binding ErrorWord}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
