@@ -65,8 +65,13 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBox Grid.Row="0" Grid.ColumnSpan="2" Margin="5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
-                 Style="{StaticResource RoundedTextBoxStyle}" Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox Grid.Row="0" Grid.ColumnSpan="2" Margin="5"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 Style="{StaticResource RoundedTextBoxStyle}"
+                 Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"/>
 
         <Button Grid.Row="1" Grid.Column="0" Content="Провести частотный анализ" Margin="5" Style="{StaticResource RoundedButtonStyle}"
                 Command="{Binding FrequencyAnalysisCommand}"/>
