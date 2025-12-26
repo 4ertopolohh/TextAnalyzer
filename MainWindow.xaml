@@ -15,19 +15,29 @@
 
     <Window.Resources>
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#d4fafc"/>
+            <Setter Property="Background" Value="#ebebeb"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Height" Value="30"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="bd"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
                         </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
 
         <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="1"/>

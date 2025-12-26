@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TextAnalyzer.Models
 {
+    //модель слова в бд
     public class Word
     {
         public int Id { get; set; }

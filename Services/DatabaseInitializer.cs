@@ -5,14 +5,19 @@ namespace TextAnalyzer.Services
 {
     public static class DatabaseInitializer
     {
+        //подключение к бд
         public static void Initialize()
         {
             using var context = new ApplicationDbContext();
+            //проверка создана такая бд или еще нет
             context.Database.EnsureCreated();
 
+            //если таблица не создана то создается
             if (!context.Words.Any())
             {
                 var words = GetRussianWords();
+
+                //заполнение таблицы из списка в коде
                 foreach (var word in words)
                 {
                     context.Words.Add(new Word { Text = word });
@@ -21,6 +26,7 @@ namespace TextAnalyzer.Services
             }
         }
 
+        //список слов для заполнения таблицы
         private static List<string> GetRussianWords()
         {
             return new List<string>

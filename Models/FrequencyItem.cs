@@ -8,6 +8,7 @@ namespace TextAnalyzer.Models
 {
     public class FrequencyItem
     {
+        //элемент таблицы частотности
         public string Word { get; set; }
         public int Count { get; set; }
     }

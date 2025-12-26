@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TextAnalyzer.Models
 {
+    //элемент таблицы ошибок
     public class SpellingError
     {
         public string ErrorWord { get; set; }

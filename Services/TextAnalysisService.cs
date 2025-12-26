@@ -9,20 +9,27 @@ namespace TextAnalyzer.Services
 {
     public class TextAnalysisService
     {
+        //подключение к бд
         private readonly ApplicationDbContext _context;
+        //словарь со всеми словами из бд
         private HashSet<string> _dictionaryWords;
 
+        //конструктор
         public TextAnalysisService()
         {
             _context = new ApplicationDbContext();
             _dictionaryWords = LoadDictionaryWords();
         }
 
+        //анализ частотности
         public Dictionary<string, int> PerformFrequencyAnalysis(string text)
         {
+            //разбивает на слова
             var words = ExtractWords(text);
+            //словарь Слово - Колчиество
             var frequencyDict = new Dictionary<string, int>();
 
+            //цикл считае повторы
             foreach (var word in words)
             {
                 if (frequencyDict.ContainsKey(word))
@@ -31,21 +38,29 @@ namespace TextAnalyzer.Services
                     frequencyDict[word] = 1;
             }
 
+            //сортировка на убывание
             return frequencyDict.OrderByDescending(x => x.Value)
                               .ToDictionary(x => x.Key, x => x.Value);
         }
 
+        //проверка орфографии
         public List<SpellingError> CheckSpelling(string text)
         {
             var words = ExtractWords(text);
+            //быстрая сортировка
             var sortedWords = QuickSort(words.ToArray());
+            //список ошибок
             var errors = new List<SpellingError>();
 
+            //проверка слов
             foreach (var word in sortedWords)
             {
+                //если слова нет в словаре
                 if (!_dictionaryWords.Contains(word))
                 {
+                    //исправленный вариант
                     var suggestion = FindClosestWord(word, _dictionaryWords);
+                    //добавление в список ошибок
                     errors.Add(new SpellingError
                     {
                         ErrorWord = word,
@@ -57,23 +72,29 @@ namespace TextAnalyzer.Services
             return errors;
         }
 
+        //подбор исправление
         private string FindClosestWord(string errorWord, HashSet<string> dictionary)
         {
             if (string.IsNullOrEmpty(errorWord))
                 return string.Empty;
 
+            //самое похожее слово
             string closestWord = string.Empty;
+            //самое маленькое количество отличий
             int minDistance = int.MaxValue;
 
             foreach (var correctWord in dictionary)
             {
+                //количество ралзичий
                 int distance = CalculateLevenshteinDistance(errorWord, correctWord);
 
+                //если количество различий меньше самого маленького и отличий меньше или равно 2, то слово подбирается в похожее
                 if (distance < minDistance && distance <= 2) 
                 {
                     minDistance = distance;
                     closestWord = correctWord;
 
+                    //если в слове всего одно различие то дальше можно не искать
                     if (distance == 1)
                         break;
                 }
@@ -82,6 +103,7 @@ namespace TextAnalyzer.Services
             return closestWord ?? string.Empty;
         }
 
+        //вычисление раличий между словами 
         private int CalculateLevenshteinDistance(string a, string b)
         {
             if (string.IsNullOrEmpty(a))
@@ -89,8 +111,10 @@ namespace TextAnalyzer.Services
             if (string.IsNullOrEmpty(b))
                 return a.Length;
 
+            //создание матрицы
             int[,] matrix = new int[a.Length + 1, b.Length + 1];
 
+            //заполнение матрицы
             for (int i = 0; i <= a.Length; i++)
                 matrix[i, 0] = i;
             for (int j = 0; j <= b.Length; j++)
@@ -114,15 +138,22 @@ namespace TextAnalyzer.Services
             return matrix[a.Length, b.Length];
         }
 
+        //текст в список слов
         private List<string> ExtractWords(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return new List<string>();
 
+            //поиск слов с игнором регистра, "\b[а-яё]+\b" шаблон слов, идет одна буква от а до я/ё и больше
             var matches = Regex.Matches(text, @"\b[а-яё]+\b", RegexOptions.IgnoreCase);
+            //возврат коллекции совпадений 
             return matches.Cast<Match>()
+                .Where(m => m.Success)
+                         //к нижнему регистру
                          .Select(m => m.Value.ToLower())
+                         //слова только с длиной больше 2 включительно
                          .Where(w => w.Length > 1)
+                         //готовый список слов
                          .ToList();
         }
 
@@ -130,16 +161,20 @@ namespace TextAnalyzer.Services
         {
             if (array.Length <= 1) return array;
 
+            //сортировка массива
             QuickSort(array, 0, array.Length - 1);
             return array;
         }
 
+        //быстрая сортировка
         private void QuickSort(string[] array, int left, int right)
         {
             if (left < right)
             {
                 int pivotIndex = Partition(array, left, right);
+                //сортировка левой части масива
                 QuickSort(array, left, pivotIndex - 1);
+                //сортировка правой части массива
                 QuickSort(array, pivotIndex + 1, right);
             }
         }
@@ -147,10 +182,12 @@ namespace TextAnalyzer.Services
         private int Partition(string[] array, int left, int right)
         {
             string pivot = array[right];
+            //граница между тем что слева от опорного слова и тем что справа
             int i = left - 1;
 
             for (int j = left; j < right; j++)
             {
+                //если текущее слово стоит по алфавиту раньше опорного или равно еик то оно должно быть слева
                 if (string.Compare(array[j], pivot, StringComparison.Ordinal) <= 0)
                 {
                     i++;
@@ -158,6 +195,7 @@ namespace TextAnalyzer.Services
                 }
             }
 
+            //ставим опорное слово на правильное место
             Swap(array, i + 1, right);
             return i + 1;
         }
@@ -169,14 +207,21 @@ namespace TextAnalyzer.Services
 
         private HashSet<string> LoadDictionaryWords()
         {
+            //слова из базы данных
             var list = _context.Words
+                               //только текст
                                .Select(w => w.Text)
+                               //отключение от sql
                                .AsEnumerable()
+                               //если нулл то пустая строка, убираем пробелы по краям слов, делаем нижний регистр
                                .Select(s => (s ?? string.Empty).Trim().ToLowerInvariant())
+                               //оставляем только не пустые строки
                                .Where(s => s.Length > 0)
+                               //удаление повторов
                                .Distinct()
+                               //создаем список из слов
                                .ToList();
-
+            //загрузка списка слов, приравнивание к нижнему регистру
             return new HashSet<string>(list, StringComparer.OrdinalIgnoreCase);
         }
     }

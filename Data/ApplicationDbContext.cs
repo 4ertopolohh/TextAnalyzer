@@ -8,8 +8,9 @@ using TextAnalyzer.Models;
 
 namespace TextAnalyzer.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext     
     {
+        //подключение к бд
         public DbSet<Word> Words { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
